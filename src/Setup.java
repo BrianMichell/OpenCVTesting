@@ -15,8 +15,6 @@ public class Setup {
 	public static void main(String[] args) {
 		
 		Runner r = new Runner();
-		
-		System.out.println("Testing");
 
 		SwingUtilities.invokeLater(() -> {
 			JFrame frame = new JFrame("Setup");
