@@ -18,7 +18,7 @@ import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
 public class Runner {
-
+	
 	private static int blur; // The amount that is being blurred.
 	private static Mat image; // A saved version of the picture.
 	private static Mat tmp;
@@ -30,6 +30,8 @@ public class Runner {
 	private static int threshold=25;
 
 	public void graphics() {
+		
+		System.out.println("This is the HSV file");
 
 		SwingUtilities.invokeLater(() -> { // Lambda expression to start the
 											// Swing program

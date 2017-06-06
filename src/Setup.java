@@ -15,6 +15,8 @@ public class Setup {
 	public static void main(String[] args) {
 		
 		Runner r = new Runner();
+		
+		System.out.println("This is the HSV testing file");
 
 		SwingUtilities.invokeLater(() -> {
 			JFrame frame = new JFrame("Setup");
