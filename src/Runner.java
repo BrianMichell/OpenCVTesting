@@ -12,19 +12,25 @@ import javax.swing.JMenuBar;
 import javax.swing.JSlider;
 import javax.swing.SwingUtilities;
 
+import org.opencv.core.Core;
 import org.opencv.core.Mat;
+import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
+@SuppressWarnings("unused")
 public class Runner {
 	
 	private static int blur; // The amount that is being blurred.
 	private static Mat image; // A saved version of the picture.
 	private static Mat tmp;
-	private static final int MIN_BLUR = 1; // This is the lowest number the blur can go before it throws errors.
-	private static final int MIN_THRESH=1;
-	private static final int MAX_THRESH=255;
+	private static int hueMin;
+	private static int hueMax;
+	private static int satMin;
+	private static int satMax;
+	private static int valMin;
+	private static int valMax;
 	
 	private static int max_blur = 2;
 	private static int threshold=25;
@@ -43,81 +49,69 @@ public class Runner {
 			BufferedImage img = null; // A usable picture for Swing
 
 			try {
-				img = Mat2BufferedImage(image); // Sets the picture to whatever's in the matrix
+				img = Mat2BufferedImage(tmp); // Sets the picture to whatever's in the matrix
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 
 			JLabel lbl = new JLabel(); // Where the picture will be placed
-
-			// The buttons used to manipulate the picture
-			JButton blurPlus = new JButton("+");
-			JButton blurMinus = new JButton("-");
-			JButton threshPlus=new JButton("+");
-			JButton threshMinus=new JButton("-");
+			JLabel picture = new JLabel(); // Unmodified picture
 
 			// Slider to make quick adjustments based on the range
-			JSlider blurSlider = new JSlider(MIN_BLUR, max_blur, MIN_BLUR);
-			JSlider thresh = new JSlider(MIN_THRESH,MAX_THRESH,50); // Default set to 50 is arbitrary.
-
-			// Sets up a menu bar which will be used to select the OpenCV function at a later time.
-			JMenuBar menu = new JMenuBar();
-			JMenu selector = new JMenu("Help");
-			selector.add(new JButton("Help"));
-			menu.add(selector);
+			JSlider hueMinSlider = new JSlider(0, 255, 0);
+			JSlider hueMaxSlider = new JSlider(0,255,255);
+			JSlider satMinSlider = new JSlider(0,255,0);
+			JSlider satMaxSlider = new JSlider(0,255,255);
+			JSlider valMinSlider = new JSlider(0,255,0);
+			JSlider valMaxSlider = new JSlider(0,255,255);
 
 			// Code that is run every time the slider is moved or a button is pushed.
 			// ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼
-			blurSlider.addChangeListener((e) -> { 
-				blur = blurSlider.getValue();
-				threshold=thresh.getValue();
+			
+			hueMinSlider.addChangeListener((e)->{
+				hueMin=hueMinSlider.getValue();
+				updateDisplay(frame,lbl);
+			});
+			hueMaxSlider.addChangeListener((e)->{
+				hueMax=hueMaxSlider.getValue();
+				updateDisplay(frame,lbl);
+			});
+			satMinSlider.addChangeListener((e)->{
+				satMin=satMinSlider.getValue();
+				updateDisplay(frame,lbl);
+			});
+			satMaxSlider.addChangeListener((e)->{
+				satMax=satMaxSlider.getValue();
+				updateDisplay(frame,lbl);
+			});
+			valMinSlider.addChangeListener((e)->{
+				valMin=valMinSlider.getValue();
+				updateDisplay(frame,lbl);
+			});
+			valMaxSlider.addChangeListener((e)->{
+				valMax=valMaxSlider.getValue();
 				updateDisplay(frame,lbl);
 			});
 			
-			thresh.addChangeListener((e)->{
-				blur = blurSlider.getValue();
-				threshold=thresh.getValue();
-				updateDisplay(frame,lbl);
-			});
-
-			blurPlus.addActionListener((e) -> {
-				changeBlur(1);
-				blurSlider.setValue(blur);
-				updateDisplay(frame,lbl);
-			});
-
-			blurMinus.addActionListener((e) -> {
-				changeBlur(-1);
-				blurSlider.setValue(blur);
-				updateDisplay(frame,lbl);
-			});
-			
-			threshPlus.addActionListener((e)->{
-				changeThresh(1);
-				thresh.setValue(threshold);
-				updateDisplay(frame,lbl);
-			});
-			
-			threshMinus.addActionListener((e)->{
-				changeThresh(-1);
-				thresh.setValue(threshold);
-				updateDisplay(frame,lbl);
-			});
-			// ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
 
 			lbl.setIcon(new ImageIcon(img));
-
-			frame.add(blurMinus);
-			frame.add(blurSlider);
-			frame.add(blurPlus);
-			frame.add(new JLabel("▲▲▲Blur tool▲▲▲"));
-			frame.add(lbl);
-			frame.add(new JLabel("▼▼▼Threshold tool▼▼▼"));
-			frame.add(threshMinus);
-			frame.add(thresh);
-			frame.add(threshPlus);
 			
-			frame.setJMenuBar(menu);
+			
+			frame.add(hueMaxSlider);
+			frame.add(new JLabel("<--- Max Hue Min --->"));
+			frame.add(hueMinSlider);
+			frame.add(satMaxSlider);
+			frame.add(new JLabel("<--- Max Sat Min --->"));
+			frame.add(satMinSlider);
+			frame.add(valMaxSlider);
+			frame.add(new JLabel("<--- Max Val Min --->"));
+			frame.add(valMinSlider);
+			frame.add(lbl);
+			frame.add(new JLabel(""));
+			JLabel original = new JLabel();
+			original.setIcon(new ImageIcon(Mat2BufferedImage(image)));
+			frame.add(original);
+	
 			frame.setLocationRelativeTo(null); // The program will open wherever.
 			frame.pack(); // Puts all the frame together
 			frame.setVisible(true); // Shows the frame
@@ -127,14 +121,13 @@ public class Runner {
 	}
 
 	public Runner() {
-		blur = MIN_BLUR;
 
 		System.loadLibrary("opencv_java310");
 		image = Imgcodecs.imread("C:\\Users\\Brian\\Pictures\\tower.jpg");
 		tmp = new Mat(image.width(), image.cols(), image.type());
-		Imgproc.cvtColor(tmp, tmp, Imgproc.COLOR_BGR2GRAY);
-		Imgproc.threshold(tmp, tmp, threshold, 255, Imgproc.THRESH_BINARY);
-		Imgproc.equalizeHist(tmp, tmp);
+		//tmp=image.clone();
+		Imgproc.cvtColor(image, tmp, Imgproc.COLOR_BGR2HSV);
+		Core.inRange(tmp, new Scalar(0,100,0), new Scalar(50,255,255), tmp);
 
 	}
 
@@ -145,12 +138,10 @@ public class Runner {
 	 * @return the appropriately blurred version of the original picture
 	 * @author Brian
 	 */
-	public static Mat blurIt() {
+	public static Mat hsvChange() {
 		Mat tmp = image.clone();
-		Imgproc.cvtColor(image, tmp, Imgproc.COLOR_BGR2GRAY);
-		Imgproc.threshold(tmp, tmp, threshold, 255, Imgproc.THRESH_BINARY);
-		Imgproc.equalizeHist(tmp, tmp);
-		Imgproc.blur(tmp, tmp, new Size(blur, blur));
+		Imgproc.cvtColor(image, tmp, Imgproc.COLOR_BGR2HSV);
+		Core.inRange(tmp, new Scalar(hueMin,satMin,valMin), new Scalar(hueMax,satMax,valMax), tmp);
 		return tmp;
 	}
 
@@ -182,29 +173,6 @@ public class Runner {
 
 	}
 
-	/**
-	 * A little utility to streamline altering the blur. It will catch any
-	 * potential problems with too much or too little blur.
-	 * 
-	 * @param change
-	 *            The amount that you want the blur to change by.
-	 * @author Brian
-	 */
-	public static void changeBlur(int change) {
-		if(blur+change>=MIN_BLUR && blur+change<=max_blur){
-			blur+=change;
-		}
-	}
-	
-	/**
-	 * Changes the threshold value and keeps it within the correct range.
-	 * @param change The amount that you want to change the threshold by.
-	 */
-	public static void changeThresh(int change){
-		if(threshold+change>=MIN_THRESH && threshold+change<=MAX_THRESH){
-			threshold+=change;
-		}
-	}
 
 	/**
 	 * Used to set the maximum blur value by other classes.
@@ -220,7 +188,7 @@ public class Runner {
 	 * @param label The holder for the picture.
 	 */
 	private static void updateDisplay(JFrame frm, JLabel label){
-		Mat tmp = blurIt().clone();
+		Mat tmp = hsvChange().clone();
 		try {
 			label.setIcon(new ImageIcon(Mat2BufferedImage(tmp)));
 		} catch (Exception ex) {
