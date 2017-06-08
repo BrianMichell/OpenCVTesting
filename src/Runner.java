@@ -22,7 +22,6 @@ import org.opencv.imgproc.Imgproc;
 @SuppressWarnings("unused")
 public class Runner {
 	
-	private static int blur; // The amount that is being blurred.
 	private static Mat image; // A saved version of the picture.
 	private static Mat tmp;
 	private static int hueMin;
@@ -32,8 +31,6 @@ public class Runner {
 	private static int valMin;
 	private static int valMax;
 	
-	private static int max_blur = 2;
-	private static int threshold=25;
 
 	public void graphics() {
 		
@@ -64,9 +61,6 @@ public class Runner {
 			JSlider satMaxSlider = new JSlider(0,255,255);
 			JSlider valMinSlider = new JSlider(0,255,0);
 			JSlider valMaxSlider = new JSlider(0,255,255);
-
-			// Code that is run every time the slider is moved or a button is pushed.
-			// ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼
 			
 			hueMinSlider.addChangeListener((e)->{
 				hueMin=hueMinSlider.getValue();
@@ -125,7 +119,6 @@ public class Runner {
 		System.loadLibrary("opencv_java310");
 		image = Imgcodecs.imread("C:\\Users\\Brian\\Pictures\\tower.jpg");
 		tmp = new Mat(image.width(), image.cols(), image.type());
-		//tmp=image.clone();
 		Imgproc.cvtColor(image, tmp, Imgproc.COLOR_BGR2HSV);
 		Core.inRange(tmp, new Scalar(0,100,0), new Scalar(50,255,255), tmp);
 
@@ -173,15 +166,6 @@ public class Runner {
 
 	}
 
-
-	/**
-	 * Used to set the maximum blur value by other classes.
-	 * @param val The amount that the max blur is.
-	 */
-	public void setMaxVal(int val) {
-		max_blur = val;
-	}
-	
 	/**
 	 * Update the image being displayed.
 	 * @param frm The canvas that needs updating.
